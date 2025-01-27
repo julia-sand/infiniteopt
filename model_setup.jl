@@ -4,9 +4,9 @@ using InfiniteOpt, Distributions, Ipopt;
 using Trapz;
 using CSV;
 using DataFrames;
-using Interpolations;
+#using Interpolations;
 using ForwardDiff;
-using ImageFiltering;
+#using ImageFiltering;
 #using Polynomials;
 ##filtering functions
 
@@ -49,16 +49,16 @@ global function underdamped_p_final(p,q)
 end;
 
 #get Caluya-Halder output
-df_new = CSV.read("results_kl_land_new1.csv",DataFrame,header=true);
+#df_new = CSV.read("results_kl_land_new1.csv",DataFrame,header=true);
 
-time_interval = vec(unique(df_new.t))
-global time_interval = round.(time_interval;digits = 4)
+#time_interval = vec(unique(df_new.t))
+#global time_interval = round.(time_interval;digits = 4)
 
-global time_grid = Int(length(time_interval));
+#global time_grid = Int(length(time_interval));
 
 
-global time_steps_vec = [round.(time_interval[Int(k+1)]-time_interval[Int(k)];digits =3) for k in 1:length(time_interval)-1];
-global plot_times = time_interval[begin:4:end]; #these times are used in the plots
+#global time_steps_vec = [round.(time_interval[Int(k+1)]-time_interval[Int(k)];digits =3) for k in 1:length(time_interval)-1];
+#global plot_times = time_interval[begin:4:end]; #these times are used in the plots
 
 ##LATTICE PARAMETERS!!!
 T = 1 #0.2
@@ -90,7 +90,7 @@ function v_init(t,y)
     #p = Polynomial([0.012501817,1.7759079, 
     #        -0.98531216, 0.29115227, 
     #        0.16276835, -0.04258577,0.01356363], :y)
-    return ((1/4)*((y^2 - 1)^2))/10
+    return ((1/4)*((y^2 - 1)^2))#/10
 end
     
 function rho_init(t,y)
@@ -152,5 +152,31 @@ vvals = reshape(value(v),(num_supports_t,num_supports_q));
 uvals = reshape(value(u),(num_supports_t,num_supports_q));
 
 qax = vec(unique(qgrid))
+times_vec = vec(unique(tgrid))
 
 #save results to csv
+####save a csv file  
+file_name = "infiniteopt/ipopt_overdampedkl_v1.csv"
+
+# Define the header as an array of strings
+row = ["t" "x" "du" "v" "rho"]
+header = DataFrame(row,transpose(row))
+
+# Write the header to a new CSV file
+CSV.write(file_name, header;header =false)
+
+
+for j in 1:num_supports_t
+     df = DataFrame([times_vec[j] .*vec(ones(num_supports_q)),
+                    vec(qax),
+                    vec(uvals[j,:]),
+                    vec(vvals[j,:]),
+                    vec(rhovals[j,:])],
+                    transpose(row))
+
+    CSV.write(file_name, df, append =true)
+    
+end
+
+
+
