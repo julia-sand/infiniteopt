@@ -162,7 +162,7 @@ for t in 1:11
     curr_time = plot_times[t]
     
     filtered_df = filter(row -> row.t == curr_time, df_new)
-    plot!(p2,vec(qax),(vec(rhovals[t*2-1,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
+    plot!(p2,vec(qax),(vec(rhovals[t,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
     plot!(p2,vec(filtered_df.x),filtered_df.rho,subplot=t,label = "drift output")
 
     
@@ -189,7 +189,7 @@ for t in 1:11
     
     
     filtered_df = filter(row -> row.t == curr_time, df_new)
-    plot!(p2,vec(qax),(vec(uvals[2*t-1,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
+    plot!(p2,vec(qax),(vec(uvals[t,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
 
 
     fun_temp = linear_interpolation(vec(filtered_df.x),vec(filtered_df.sigma),extrapolation_bc = Line())
@@ -222,7 +222,7 @@ for t in 1:11
     
     
     filtered_df = filter(row -> row.t == curr_time, df_new)
-    plot!(p2,vec(qax),(vec(vvals[2*t-1,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
+    plot!(p2,vec(qax),(vec(vvals[t,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
 
 
     #du = filtering(ForwardDiff.derivative.(Ref(fun_temp), vec(filtered_df.x)),60) #this is \partial_q V_t
