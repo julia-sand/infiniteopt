@@ -7,7 +7,7 @@ using DataFrames;
 using Interpolations;
 using ForwardDiff;
 using ImageFiltering;
-using Polynomials;
+#using Polynomials;
 ##filtering functions
 
 #get the normalisation constants
