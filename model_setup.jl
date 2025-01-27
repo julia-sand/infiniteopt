@@ -1,6 +1,6 @@
 #get all the packies
 using InfiniteOpt, Distributions, Ipopt;
-using Plots;
+#using Plots;
 using Trapz;
 using CSV;
 using DataFrames;
@@ -153,18 +153,4 @@ uvals = reshape(value(u),(num_supports_t,num_supports_q));
 
 qax = vec(unique(qgrid))
 
-##Distribution
-p2 = plot(layout = 12)
-
-#evolve
-for t in 1:11
-
-    curr_time = plot_times[t]
-    
-    #filtered_df = filter(row -> row.t == curr_time, df_new)
-    plot!(p2,vec(qax),(vec(rhovals[t,:])),subplot=t,label = "drift output",title ="t= $curr_time",titlefontsize = 12)
-    plot!(p2,vec(filtered_df.x),filtered_df.rho,subplot=t,label = "drift output")
-
-    
-end
-
+#save results to csv
