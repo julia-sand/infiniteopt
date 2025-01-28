@@ -89,7 +89,7 @@ end
 @constraint(model, deriv(sigma,t) - ((epsilon^2)/2)*(deriv(sigma,q)^2)== 0)
 
 #stationarity condition
-@constraint(model, u == deriv(sigma,q) - deriv(log(rho),q))
+@constraint(model, deriv(sigma,q) - deriv(log(rho),q) == u)
 
 #boundary conditions on rho
 @constraint(model, rho(0,q) == exp(-((q-1)^4)/4)/norminitial)
