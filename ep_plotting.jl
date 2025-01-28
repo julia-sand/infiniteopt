@@ -28,7 +28,7 @@ end;
 
 #get Caluya-Halder output
 #df_calhal = CSV.read("infiniteopt/results_kl_land_new1.csv",DataFrame,header=true);
-df_ipopt = CSV.read("infiniteopt/ipopt_overdampedkl_v1.csv",DataFrame,header=true);
+df_ipopt = CSV.read("infiniteopt/ep/ipopt_overdampedep_v1.csv",DataFrame,header=true);
 
 plot_times = range(0, T, 11)
 
