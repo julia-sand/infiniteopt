@@ -41,7 +41,7 @@ for t in 1:11
     curr_time = plot_times[t]
     
     
-    filtered_df = filter(row -> row.t == curr_time, df_calhal)
+    filtered_df = filter(row -> round(row.t,4) == curr_time, df_calhal)
     filtered_df_ipopt = filter(row -> row.t == curr_time, df_ipopt)
 
 
@@ -55,13 +55,14 @@ end
 
 
 plot!(p2,xlim =(-4,4))
+plot!(p2,ylim =(-0.05,0.5))
 plot!(p2,legend = false)
-plot!(p2,[],[],framestyle = :none,legend = true,labels = "IPOPT", subplot = 12,fg_legend = :false)
 
-plot!(p2,[],[],framestyle = :none,legend = true,labels = "Caluya-Halder", subplot = 12)
+plot!(p2,[],[],framestyle = :none,legend = true,labels = "Caluya-Halder", subplot = 12,fg_legend = :false)
+plot!(p2,[],[],framestyle = :none,legend = true,labels = "IPOPT", subplot = 12)
 
 
-plot(p2)
+#plot(p2)
 
 savefig("overdamped_distributions.png")
 
