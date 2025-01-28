@@ -5,7 +5,7 @@ using ImageFiltering;
 using Interpolations;
 using ForwardDiff;
 
-T = 1
+T = 0.2
 
 ##filtering functions
 function filtering(input_array,filter_delta)
@@ -41,7 +41,7 @@ for t in 1:11
     curr_time = plot_times[t]
     
     
-    filtered_df = filter(row -> round(row.t,4) == curr_time, df_calhal)
+    filtered_df = filter(row -> row.t == curr_time, df_calhal)
     filtered_df_ipopt = filter(row -> row.t == curr_time, df_ipopt)
 
 

@@ -1,22 +1,12 @@
 #get all the packies
 using InfiniteOpt, Distributions, Ipopt;
-#using Plots;
 using Trapz;
 using CSV;
 using DataFrames;
-#using Interpolations;
 using ForwardDiff;
-#using ImageFiltering;
-#using Polynomials;
-##filtering functions
-
-#get the normalisation constants
 
 
-
-
-#intial and final distributions
-###########
+#####boundary conditions#######
 global function p_initial(y)
 
     return exp.(-((y.-1).^4)/4)
@@ -35,36 +25,10 @@ global normfinal = abs.(trapz(norm_range,p_final(norm_range)));
 global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
 
 
-#intial and final distributions
-###########
-global function underdamped_p_initial(p,q)
-
-    return exp.(-(((q.-1).^4)/4 .+ (p.^2)/2))/norminitial
-end;
-
-
-global function underdamped_p_final(p,q)
-
-    return exp.(-((((q.^2).-1).^2)/4 .+ (p.^2)/2))/normfinal;
-end;
-
-#get Caluya-Halder output
-#df_new = CSV.read("results_kl_land_new1.csv",DataFrame,header=true);
-
-#time_interval = vec(unique(df_new.t))
-#global time_interval = round.(time_interval;digits = 4)
-
-#global time_grid = Int(length(time_interval));
-
-
-#global time_steps_vec = [round.(time_interval[Int(k+1)]-time_interval[Int(k)];digits =3) for k in 1:length(time_interval)-1];
-#global plot_times = time_interval[begin:4:end]; #these times are used in the plots
-
 ##LATTICE PARAMETERS!!!
-T = 1 #0.2
-num_supports_t = 11
-num_supports_q = 10
-num_supports_p = 10
+T = 0.2
+num_supports_t = 21
+num_supports_q = 100
 
 ##################################
 #Get the model
@@ -78,19 +42,16 @@ model = InfiniteModel(Ipopt.Optimizer);
 @infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
 
 #space
-@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
+#@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
 
 
 #let's define some good initial guesses
 function u_init(t,y)
-    return ((y-1)^3)/10
+    return ((y-1)^3)
 end
     
 function v_init(t,y)
-    #p = Polynomial([0.012501817,1.7759079, 
-    #        -0.98531216, 0.29115227, 
-    #        0.16276835, -0.04258577,0.01356363], :y)
-    return ((1/4)*((y^2 - 1)^2))#/10
+     return ((1/4)*((y^2 - 1)^2))
 end
     
 function rho_init(t,y)

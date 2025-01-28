@@ -1,20 +1,12 @@
 #get all the packies
 using InfiniteOpt, Distributions, Ipopt;
-#using Plots;
 using Trapz;
 using CSV;
 using DataFrames;
-#using Interpolations;
 using ForwardDiff;
-#using ImageFiltering;
-#using Polynomials;
-##filtering functions
-
-#get the normalisation constants
 
 
-
-
+####boundary conditions
 #intial and final distributions
 ###########
 global function p_initial(y)
@@ -34,25 +26,11 @@ norm_range = Array(range(-8,8,8000))
 global normfinal = abs.(trapz(norm_range,p_final(norm_range)));
 global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
 
-
-#intial and final distributions
-###########
-global function underdamped_p_initial(p,q)
-
-    return exp.(-(((q.-1).^4)/4 .+ (p.^2)/2))/norminitial
-end;
-
-
-global function underdamped_p_final(p,q)
-
-    return exp.(-((((q.^2).-1).^2)/4 .+ (p.^2)/2))/normfinal;
-end;
-
 ##LATTICE PARAMETERS!!!
 T0 = 2 #0.2
 num_supports_t = 11
 num_supports_q = 10
-num_supports_p = 10
+
 epsilon = 0.2
 g = 0.01
 T = (epsilon^2)*T0
@@ -68,13 +46,11 @@ model = InfiniteModel(Ipopt.Optimizer);
 #space
 @infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
 
-#space
-#@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
 
 
 #let's define some good initial guesses
 function u_init(t,y)
-    return ((y-1)^3)/10
+    return ((y-1)^3)
 end
     
 function v_init(t,y)
@@ -101,13 +77,13 @@ end
 @variable(model, rho>=0, Infinite(t,q), start = rho_init)
 
 #the optimal control
-@variable(model, u, Infinite(t,q), start = v_init)
+@variable(model, u, Infinite(t,q), start = u_init)
 
 #define the objective
-@objective(model, Min, integral(integral((u^2-deriv(u,q))*rho,q), t))
+@objective(model, Min, integral(integral(((u^2)-deriv(u,q))*rho,q), t))
 
 #equation for density 
-@constraint(model, deriv(rho,t) - (epsilon**2)*deriv(sigma,q)*deriv(rho,q)== 0)
+@constraint(model, deriv(rho,t) - (epsilon^2)*deriv(sigma,q)*deriv(rho,q)== 0)
 
 #burgers equation
 @constraint(model, deriv(sigma,t) - ((epsilon^2)/2)*(deriv(sigma,q)^2)== 0)
@@ -135,7 +111,7 @@ tgrid = [supports(rho)[i][1] for i in 1:length(supports(rho))]
 qgrid = [supports(rho)[i][2] for i in 1:length(supports(rho))];
 
 rhovals = reshape(value(rho),(num_supports_t,num_supports_q));
-vvals = reshape(value(v),(num_supports_t,num_supports_q));
+sigvals = reshape(value(sigma),(num_supports_t,num_supports_q));
 uvals = reshape(value(u),(num_supports_t,num_supports_q));
 
 qax = vec(unique(qgrid))
@@ -146,8 +122,8 @@ times_vec = vec(unique(tgrid))
 file_name = "infiniteopt/ep/ipopt_overdampedep_v1.csv"
 
 # Define the header as an array of strings
-row = ["t" "x" "du" "v" "rho"]
-header = DataFrame(row,["t", "x", "du", "v", "rho"])
+row = ["t" "x" "du" "sigma" "rho"]
+header = DataFrame(row,["t", "x", "du", "sigma", "rho"])
 
 # Write the header to a new CSV file
 CSV.write(file_name, header;header =false)
@@ -157,9 +133,9 @@ for j in 1:num_supports_t
      df = DataFrame([times_vec[j] .*vec(ones(num_supports_q)),
                     vec(qax),
                     vec(uvals[j,:]),
-                    vec(vvals[j,:]),
+                    vec(sigvals[j,:]),
                     vec(rhovals[j,:])],
-                    ["t", "x", "du", "v", "rho"])
+                    ["t", "x", "du", "sigma", "rho"])
 
     CSV.write(file_name, df, append =true)
     
