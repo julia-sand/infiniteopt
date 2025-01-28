@@ -27,8 +27,8 @@ global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
 
 ##LATTICE PARAMETERS!!!
 T = 0.2
-num_supports_t = 21
-num_supports_q = 100
+num_supports_t = 101
+num_supports_q = 1000
 
 ##################################
 #Get the model

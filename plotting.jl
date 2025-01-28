@@ -39,15 +39,12 @@ p2 = plot(layout = 12)
 for t in 1:11
 
     curr_time = plot_times[t]
-    
+    println(curr_time)    
     
     filtered_df = filter(row -> row.t == curr_time, df_calhal)
     filtered_df_ipopt = filter(row -> row.t == curr_time, df_ipopt)
 
 
-    #fun_temp = linear_interpolation(vec(filtered_df.x),
-    #du = filtering(ForwardDiff.derivative.(Ref(fun_temp), vec(filtered_df.x)),60) 
-    
     plot!(p2,vec(filtered_df.x),vec(filtered_df.rho),subplot=t,label = "Caluya-Halder")
     plot!(p2,vec(filtered_df_ipopt.x),vec(filtered_df_ipopt.rho),subplot=t,label = "InfiniteOpt",title ="t= $curr_time",titlefontsize = 12)
     
