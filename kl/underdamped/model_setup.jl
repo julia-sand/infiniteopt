@@ -78,13 +78,13 @@ end
 @objective(model, Min, integral(integral((u^2)*rho,q), t)/4)
 
 #fokker planck
-@constraint(model, deriv(rho,t) - deriv(u*rho,q) - deriv(rho,q,q)== 0)
+@constraint(model, deriv(rho,t) + epsilon*p*deriv(rho,q) - deriv((p+u)*rho,q) + deriv(rho,p,p)== 0)
 
 #hjb
-@constraint(model, deriv(v,t) - u*deriv(v,q) + deriv(v,q,q) + (u^2)/4 == 0)
+@constraint(model, deriv(v,t) - p*deriv(v,p) + deriv(v,p,p) + epsilon*p*deriv(v,q) - epsilon*u*deriv(v,p) == -((epsilon*u)^2)/4)
 
 #stationarity condition
-@constraint(model, integral((rho(t,p,q)/integral(rho(t,p,q),p))*deriv(v,q),p) == u)
+@constraint(model, integral((rho(t,p,q)/integral(rho(t,p,q),p))*deriv(v,q),p) == epsilon*u/2)
 
 #boundary conditions on rho
 @constraint(model, rho(0,p,q) == p_initial(p,q))
@@ -120,8 +120,8 @@ times_vec = vec(unique(tgrid))
 file_name = "infiniteopt/ipopt_underdampedkl_v1.csv"
 
 # Define the header as an array of strings
-row = ["t" "x" "du" "v" "rho"]
-header = DataFrame(row,["t", "x", "du", "v", "rho"])
+row = ["t" "p" "q" "du" "v" "rho"]
+header = DataFrame(row,["t", "p", "q", "du", "v", "rho"])
 
 # Write the header to a new CSV file
 CSV.write(file_name, header;header =false)
@@ -129,11 +129,12 @@ CSV.write(file_name, header;header =false)
 
 for j in 1:num_supports_t
      df = DataFrame([times_vec[j] .*vec(ones(num_supports_p*num_supports_q)),
+                    vec(pax),
                     vec(qax),
                     vec(uvals[j,:,:]),
                     vec(vvals[j,:,:]),
                     vec(rhovals[j,:,:])],
-                    ["t", "x", "du", "v", "rho"])
+                    ["t", "p", "q", "du", "v", "rho"])
 
     CSV.write(file_name, df, append =true)
     
