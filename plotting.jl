@@ -5,6 +5,8 @@ using ImageFiltering;
 using Interpolations;
 using ForwardDiff;
 
+T = 1
+
 ##filtering functions
 function filtering(input_array,filter_delta)
     
