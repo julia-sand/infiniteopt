@@ -24,7 +24,7 @@ global function p_final(p,q)
 end;
 
 ##LATTICE PARAMETERS!!!
-T = 0.2
+T = 2
 num_supports_t = 11
 num_supports_q = 10
 num_supports_p = 10
