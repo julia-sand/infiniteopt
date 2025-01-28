@@ -5,7 +5,7 @@ using DataFrames;
 #using Interpolations;
 #using ForwardDiff;
 
-T = 0.2
+T = 2
 
 ##filtering functions
 function filtering(input_array,filter_delta)
