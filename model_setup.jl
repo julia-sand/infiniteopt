@@ -160,7 +160,7 @@ file_name = "infiniteopt/ipopt_overdampedkl_v1.csv"
 
 # Define the header as an array of strings
 row = ["t" "x" "du" "v" "rho"]
-header = DataFrame(row,["t", "x", "sigma", "rho"])
+header = DataFrame(row,["t", "x", "du", "v", "rho"])
 
 # Write the header to a new CSV file
 CSV.write(file_name, header;header =false)
@@ -172,7 +172,7 @@ for j in 1:num_supports_t
                     vec(uvals[j,:]),
                     vec(vvals[j,:]),
                     vec(rhovals[j,:])],
-                    ["t", "x", "sigma", "rho"])
+                    ["t", "x", "du", "v", "rho"])
 
     CSV.write(file_name, df, append =true)
     
