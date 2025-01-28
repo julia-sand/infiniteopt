@@ -48,23 +48,14 @@ global function underdamped_p_final(p,q)
     return exp.(-((((q.^2).-1).^2)/4 .+ (p.^2)/2))/normfinal;
 end;
 
-#get Caluya-Halder output
-#df_new = CSV.read("results_kl_land_new1.csv",DataFrame,header=true);
-
-#time_interval = vec(unique(df_new.t))
-#global time_interval = round.(time_interval;digits = 4)
-
-#global time_grid = Int(length(time_interval));
-
-
-#global time_steps_vec = [round.(time_interval[Int(k+1)]-time_interval[Int(k)];digits =3) for k in 1:length(time_interval)-1];
-#global plot_times = time_interval[begin:4:end]; #these times are used in the plots
-
 ##LATTICE PARAMETERS!!!
-T = 1 #0.2
+T0 = 2 #0.2
 num_supports_t = 11
 num_supports_q = 10
 num_supports_p = 10
+epsilon = 0.2
+g = 0.01
+T = (epsilon^2)*T0
 
 ##################################
 #Get the model
@@ -78,7 +69,7 @@ model = InfiniteModel(Ipopt.Optimizer);
 @infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
 
 #space
-@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
+#@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
 
 
 #let's define some good initial guesses
@@ -87,10 +78,8 @@ function u_init(t,y)
 end
     
 function v_init(t,y)
-    #p = Polynomial([0.012501817,1.7759079, 
-    #        -0.98531216, 0.29115227, 
-    #        0.16276835, -0.04258577,0.01356363], :y)
-    return ((1/4)*((y^2 - 1)^2))#/10
+
+    return ((1/4)*((y^2 - 1)^2)) #/10
 end
     
 function rho_init(t,y)
@@ -105,28 +94,26 @@ end
 #unregister(model, :rho)
 
 
-#the optimal control
-@variable(model, u, Infinite(t,q), start = u_init)
+#the burgers velocity
+@variable(model, sigma, Infinite(t,q), start = u_init)
 
 #the density
 @variable(model, rho>=0, Infinite(t,q), start = rho_init)
 
 #the optimal control
-@variable(model, v, Infinite(t,q), start = v_init)
+@variable(model, u, Infinite(t,q), start = v_init)
 
 #define the objective
-@objective(model, Min, integral(integral((u^2)*rho,q), t)/4)
+@objective(model, Min, integral(integral((u^2-deriv(u,q))*rho,q), t))
 
-#fokker planck
-@constraint(model, deriv(rho,t) - deriv(u*rho,q) - deriv(rho,q,q)== 0)
-#@constraint(model, deriv(rho,t) - 10*deriv(u*rho,q) - deriv(rho,q,q)== 0)
+#equation for density 
+@constraint(model, deriv(rho,t) - (epsilon**2)*deriv(sigma,q)*deriv(rho,q)== 0)
 
-#hjb
-#@constraint(model, deriv(v,t) - 10*u*deriv(v,q) + deriv(v,q,q) + 2.5*(u^2) == 0)
-@constraint(model, deriv(v,t) - u*deriv(v,q) + deriv(v,q,q) + (u^2)/4 == 0)
+#burgers equation
+@constraint(model, deriv(sigma,t) - ((epsilon^2)/2)*(deriv(sigma,q)^2)== 0)
 
 #stationarity condition
-@constraint(model, 2*u == deriv(v,q))
+@constraint(model, u == deriv(sigma,q) - deriv(log(rho),q))
 
 #boundary conditions on rho
 @constraint(model, rho(0,q) == exp(-((q-1)^4)/4)/norminitial)
@@ -156,7 +143,7 @@ times_vec = vec(unique(tgrid))
 
 #save results to csv
 ####save a csv file  
-file_name = "infiniteopt/ipopt_overdampedkl_v1.csv"
+file_name = "infiniteopt/ep/ipopt_overdampedep_v1.csv"
 
 # Define the header as an array of strings
 row = ["t" "x" "du" "v" "rho"]
