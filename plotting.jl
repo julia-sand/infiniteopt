@@ -61,5 +61,5 @@ plot!(p2,[],[],framestyle = :none,legend = true,labels = "IPOPT", subplot = 12)
 
 #plot(p2)
 
-savefig("overdamped_distributions.png")
+savefig("kl_overdamped_distributions.png")
 
