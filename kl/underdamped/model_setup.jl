@@ -49,8 +49,8 @@ function u_init(t,q)
     return ((q-1)^3)
 end
     
-function v_init(t,q)
-     return ((1/4)*((y^2 - 1)^2))
+function v_init(t,p,q)
+     return ((1/4)*((q^2 - 1)^2))
 end
     
 function rho_init(t,p,q)
@@ -66,7 +66,7 @@ end
 
 
 #the optimal control
-@variable(model, u, Infinite(t,p,q), start = u_init)
+@variable(model, u, Infinite(t,q), start = u_init)
 
 #the density
 @variable(model, rho>=0, Infinite(t,p,q), start = rho_init)
@@ -117,7 +117,7 @@ times_vec = vec(unique(tgrid))
 
 #save results to csv
 ####save a csv file  
-file_name = "infiniteopt/ipopt_underdampedkl_v1.csv"
+file_name = "infiniteopt/ipopt_underdamped_kl_v1.csv"
 
 # Define the header as an array of strings
 row = ["t" "p" "q" "du" "v" "rho"]
