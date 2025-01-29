@@ -7,10 +7,10 @@ using ForwardDiff;
 include("../params.jl")
 
 #calculate normalisation for distributions
-norm_range = Array(range(-8,8,8000))
+#norm_range = Array(range(-8,8,8000))
 
-global norminitial = abs.(trapz(norm_range,exp.(-((norm_range.-1).^4)/4)))*sqrt(2*pi)
-global normfinal = abs.(trapz(norm_range,exp.(-(((norm_range.^2).-1).^2)/4)))*sqrt(2*pi)
+#global norminitial = abs.(trapz(norm_range,exp.(-((norm_range.-1).^4)/4)))*sqrt(2*pi)
+#global normfinal = abs.(trapz(norm_range,exp.(-(((norm_range.^2).-1).^2)/4)))*sqrt(2*pi)
 
 #####boundary conditions#######
 
@@ -45,7 +45,7 @@ function v_init(t,p,q)
 end
     
 function rho_init(t,p,q)
-    return p_initial(p,q)
+    return underdamped_p_initial(p,q)
 end
 
 
