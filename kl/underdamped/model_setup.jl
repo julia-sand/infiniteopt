@@ -4,6 +4,7 @@ using CSV;
 using DataFrames;
 using ForwardDiff;
 
+include("../params.jl")
 
 #calculate normalisation for distributions
 norm_range = Array(range(-8,8,8000))
