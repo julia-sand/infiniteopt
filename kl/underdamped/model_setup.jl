@@ -13,22 +13,12 @@ global norminitial = abs.(trapz(norm_range,exp.(-((norm_range.-1).^4)/4)))*sqrt(
 global normfinal = abs.(trapz(norm_range,exp.(-(((norm_range.^2).-1).^2)/4)))*sqrt(2*pi)
 
 #####boundary conditions#######
-global function p_initial(p,q)
-
-    return exp.(-((q.-1).^4)/4) .* exp.(-(p.^2)/2) /norminitial
-end;
-
-
-global function p_final(p,q)
-
-    return exp.(-(((q.^2).-1).^2)/4) .* exp.(-(p.^2)/2) /normfinal
-end;
 
 ##LATTICE PARAMETERS!!!
-T = 2
-num_supports_t = 11
-num_supports_q = 10
-num_supports_p = 10
+#T = 2
+#num_supports_t = 11
+#num_supports_q = 10
+#num_supports_p = 10
 
 ##################################
 #Get the model
