@@ -5,7 +5,8 @@ using DataFrames;
 #using Interpolations;
 #using ForwardDiff;
 
-T = 2
+#T = 2
+include("ep/params.jl")
 
 ##filtering functions
 function filtering(input_array,filter_delta)
