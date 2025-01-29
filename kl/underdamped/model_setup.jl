@@ -6,12 +6,6 @@ using ForwardDiff;
 
 include("../params.jl")
 
-#calculate normalisation for distributions
-#norm_range = Array(range(-8,8,8000))
-
-#global norminitial = abs.(trapz(norm_range,exp.(-((norm_range.-1).^4)/4)))*sqrt(2*pi)
-#global normfinal = abs.(trapz(norm_range,exp.(-(((norm_range.^2).-1).^2)/4)))*sqrt(2*pi)
-
 #####boundary conditions#######
 
 ##LATTICE PARAMETERS!!!
@@ -75,11 +69,11 @@ end
 @constraint(model, deriv(v,t) - p*deriv(v,p) + deriv(v,p,p) + epsilon*p*deriv(v,q) - epsilon*u*deriv(v,p) == -((epsilon*u)^2)/4)
 
 #stationarity condition
-@constraint(model, integral((rho(t,p,q)/integral(rho(t,p,q),p))*deriv(v,q),p) == epsilon*u/2)
+@constraint(model, integral((rho/integral(rho,p))*deriv(v,q),p) == epsilon*u/2)
 
 #boundary conditions on rho
-@constraint(model, rho(0,p,q) == p_initial(p,q))
-@constraint(model, rho(T,p,q) == p_final(p,q))
+@constraint(model, rho(0,p,q) == underdamped_p_initial(p,q))
+@constraint(model, rho(T,p,q) == underdamped_p_final(p,q))
 
 #add constraint to make distribution compact
 #@constraint(model, integral(rho,p,q) == 1)
