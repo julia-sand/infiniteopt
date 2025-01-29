@@ -5,7 +5,7 @@ using CSV;
 using DataFrames;
 using ForwardDiff;
 
-include("infiniteopt/kl/params.jl")
+include("params.jl")
 #=
 Setup the infinite opt model 
 =#
