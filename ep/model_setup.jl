@@ -1,39 +1,11 @@
 #get all the packies
 using InfiniteOpt, Distributions, Ipopt;
-using Trapz;
+#using Trapz;
 using CSV;
 using DataFrames;
 using ForwardDiff;
 
-
-####boundary conditions
-#intial and final distributions
-###########
-global function p_initial(y)
-
-    return exp.(-((y.-1).^4)/4)
-end;
-
-
-global function p_final(y)
-
-    return exp.(-(((y.^2).-1).^2)/4);
-end;
-
-#calculate normalisation for distributions
-norm_range = Array(range(-8,8,8000))
-
-global normfinal = abs.(trapz(norm_range,p_final(norm_range)));
-global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
-
-##LATTICE PARAMETERS!!!
-T0 = 2 #0.2
-num_supports_t = 11
-num_supports_q = 10
-
-epsilon = 0.2
-g = 0.01
-T = (epsilon^2)*T0
+include("params.jl")
 
 ##################################
 #Get the model
@@ -44,7 +16,7 @@ model = InfiniteModel(Ipopt.Optimizer);
 @infinite_parameter(model, t in [0, T], num_supports = num_supports_t)
 
 #space
-@infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
+@infinite_parameter(model, q in [-3.5, 3.5], num_supports = num_supports_q)
 
 
 
@@ -77,10 +49,11 @@ end
 @variable(model, rho>=0, Infinite(t,q), start = rho_init)
 
 #the optimal control
-@variable(model, u, Infinite(t,q), start = u_init)
+#@variable(model, u, Infinite(t,q), start = u_init)
 
 #define the objective
-@objective(model, Min, integral(integral(((u^2)-deriv(u,q))*rho,q), t))
+#@objective(model, Min, integral(integral(((u^2)-deriv(u,q))*rho,q), t))
+@objective(model, Min, integral(integral(rho*(deriv(sigma,q)^2), q),t))
 
 #equation for density 
 @constraint(model, deriv(rho,t) - (epsilon^2)*deriv(sigma,q)*deriv(rho,q)== 0)
@@ -89,7 +62,7 @@ end
 @constraint(model, deriv(sigma,t) - ((epsilon^2)/2)*(deriv(sigma,q)^2)== 0)
 
 #stationarity condition
-@constraint(model, deriv(sigma,q) - (deriv(rho,q)/rho) == u)
+#@constraint(model, deriv(sigma,q) - (deriv(rho,q)/rho) == u)
 
 #boundary conditions on rho
 @constraint(model, rho(0,q) == exp(-((q-1)^4)/4)/norminitial)
@@ -97,8 +70,8 @@ end
 
 #normalisation condition
 @constraint(model, integral(rho,q) == 1)
-@constraint(model, rho(t,-3) == 0)
-@constraint(model, rho(t,3) == 0)
+@constraint(model, rho(t,-3.5) == 0)
+@constraint(model, rho(t,3.5) == 0)
 
 
 # SOLVE THE MODEL
@@ -112,7 +85,7 @@ qgrid = [supports(rho)[i][2] for i in 1:length(supports(rho))];
 
 rhovals = reshape(value(rho),(num_supports_t,num_supports_q));
 sigvals = reshape(value(sigma),(num_supports_t,num_supports_q));
-uvals = reshape(value(u),(num_supports_t,num_supports_q));
+#uvals = reshape(value(u),(num_supports_t,num_supports_q));
 
 qax = vec(unique(qgrid))
 times_vec = vec(unique(tgrid))
@@ -122,8 +95,8 @@ times_vec = vec(unique(tgrid))
 file_name = "infiniteopt/ep/ipopt_overdampedep_v1.csv"
 
 # Define the header as an array of strings
-row = ["t" "x" "du" "sigma" "rho"]
-header = DataFrame(row,["t", "x", "du", "sigma", "rho"])
+row = ["t" "x" "sigma" "rho"]
+header = DataFrame(row,["t", "x", "sigma", "rho"])
 
 # Write the header to a new CSV file
 CSV.write(file_name, header;header =false)
@@ -132,10 +105,10 @@ CSV.write(file_name, header;header =false)
 for j in 1:num_supports_t
      df = DataFrame([times_vec[j] .*vec(ones(num_supports_q)),
                     vec(qax),
-                    vec(uvals[j,:]),
+                    #vec(uvals[j,:]),
                     vec(sigvals[j,:]),
                     vec(rhovals[j,:])],
-                    ["t", "x", "du", "sigma", "rho"])
+                    ["t", "x", "sigma", "rho"])
 
     CSV.write(file_name, df, append =true)
     

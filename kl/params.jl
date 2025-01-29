@@ -3,7 +3,7 @@ using ArgParse
 
 #=
 This file sets up boundary conditions and parameters shared by all KL models
-Arguments can be customised from the command line (parsed here)
+Arguments can be passed from the command line and are parsed here
 =#
 
 
@@ -37,17 +37,13 @@ function parse_commandline()
 end
 
 parsed_args = parse_commandline()
-#    println("Parsed args:")
-#    for (arg,val) in parsed_args
-#        println("  $arg  =>  $val")
 
 ##LATTICE PARAMETERS!!!
-T = parsed_args["tf"]
-num_supports_t = parsed_args["tsteps"]
-num_supports_q = parsed_args["qsteps"]
-num_supports_p = parsed_args["psteps"]
-epsilon = parsed_args["epsilon"]
-
+const T = parsed_args["tf"]
+const num_supports_t = parsed_args["tsteps"]
+const num_supports_q = parsed_args["qsteps"]
+const num_supports_p = parsed_args["psteps"]
+const epsilon = parsed_args["epsilon"]
 
 #####boundary conditions#######
 global function p_initial(y)
@@ -64,18 +60,18 @@ end;
 #calculate normalisation for distributions
 norm_range = Array(range(-8,8,8000))
 
-global normfinal = abs.(trapz(norm_range,p_final(norm_range)));
-global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
+global const normfinal = abs.(trapz(norm_range,p_final(norm_range)));
+global const norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
 
 
 global function underdamped_p_initial(p,q)
 
-    return exp.(-((q.-1).^4)/4) .* exp.(-(p.^2)/2) /norminitial
+    return exp.(-((q.-1).^4)/4) .* exp.(-(p.^2)/2) /(norminitial*sqrt(2*pi))
 end;
 
 
 global function underdamped_p_final(p,q)
 
-    return exp.(-(((q.^2).-1).^2)/4) .* exp.(-(p.^2)/2) /normfinal
+    return exp.(-(((q.^2).-1).^2)/4) .* exp.(-(p.^2)/2) /(normfinal*sqrt(2*pi))
 end;
 

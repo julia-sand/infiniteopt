@@ -14,7 +14,7 @@ function parse_commandline()
         "--tf"
             help = "final time of the overdamped problem"
             arg_type = Float64
-            default = 0.2
+            default = 0.08
         "--epsilon"
             help = "dimensionless parameter"
             arg_type = Float64
@@ -31,6 +31,10 @@ function parse_commandline()
             help = "number of momentum coordinates in discretisation"
             arg_type = Int
             default = 10
+        "--g"
+            help = "momentum coupling constant (dimensionless)"
+            arg_type = Float64
+            default = 0.01            
     end
 
     return parse_args(s)
@@ -44,6 +48,7 @@ num_supports_t = parsed_args["tsteps"]
 num_supports_q = parsed_args["qsteps"]
 num_supports_p = parsed_args["psteps"]
 epsilon = parsed_args["epsilon"]
+g = parsed_args["g"]
 
 
 #####boundary conditions#######
@@ -67,11 +72,11 @@ global norminitial = abs.(trapz(norm_range,p_initial(norm_range)));
 
 global function underdamped_p_initial(p,q)
 
-    return exp.(-((q.-1).^4)/4) .* exp.(-(p.^2)/2) /norminitial
+    return exp.(-((q.-1).^4)/4) .* exp.(-(p.^2)/2) /(norminitial*sqrt(2*pi))
 end;
 
 
 global function underdamped_p_final(p,q)
 
-    return exp.(-(((q.^2).-1).^2)/4) .* exp.(-(p.^2)/2) /normfinal
+    return exp.(-(((q.^2).-1).^2)/4) .* exp.(-(p.^2)/2) /(normfinal*sqrt(2*pi))
 end;

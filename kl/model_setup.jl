@@ -1,6 +1,6 @@
 #get all the packies
 using InfiniteOpt, Distributions, Ipopt;
-using Trapz;
+#using Trapz;
 using CSV;
 using DataFrames;
 using ForwardDiff;
@@ -11,17 +11,18 @@ Setup the infinite opt model
 =#
 
 
-
 ##################################
 #Setup the model
 #create a new model object
 model = InfiniteModel(Ipopt.Optimizer);
 
+set_optimizer_attribute(model, "max_iter", 500)
+
 #time
 @infinite_parameter(model, t in [0, T], num_supports = num_supports_t)
 
 #space
-@infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
+@infinite_parameter(model, q in [-5, 5], num_supports = num_supports_q)
 
 #space
 #@infinite_parameter(model, p in [-3, 3], num_supports = num_supports_p)
@@ -33,7 +34,7 @@ function u_init(t,y)
 end
     
 function v_init(t,y)
-     return ((1/4)*((y^2 - 1)^2))
+     return (1/2)*(y-1)^4
 end
     
 function rho_init(t,y)
@@ -54,33 +55,38 @@ end
 #the density
 @variable(model, rho>=0, Infinite(t,q), start = rho_init)
 
-#the optimal control
-@variable(model, v, Infinite(t,q), start = v_init)
+#the value function
+@variable(model, v>=0, Infinite(t,q), start = v_init)
 
 #define the objective
-@objective(model, Min, integral(integral((u^2)*rho,q), t)/4)
+@objective(model, Min, integral(integral((u^2)*rho,q), t))
+#@objective(model, Min, integral(integral((u^2)*rho,q), t)/4)
 
 #fokker planck
 @constraint(model, deriv(rho,t) - deriv(u*rho,q) - deriv(rho,q,q)== 0)
-#@constraint(model, deriv(rho,t) - 10*deriv(u*rho,q) - deriv(rho,q,q)== 0)
 
 #hjb
-#@constraint(model, deriv(v,t) - 10*u*deriv(v,q) + deriv(v,q,q) + 2.5*(u^2) == 0)
 @constraint(model, deriv(v,t) - u*deriv(v,q) + deriv(v,q,q) + (u^2)/4 == 0)
 
 #stationarity condition
 @constraint(model, 2*u == deriv(v,q))
 
 #boundary conditions on rho
-@constraint(model, rho(0,q) == exp(-((q-1)^4)/4)/norminitial)
-@constraint(model, rho(T,q) == exp(-((q^2-1)^2)/4)/normfinal)
+@constraint(model, rho(0,q) == p_initial(q)/norminitial)
+@constraint(model, rho(T,q) == p_final(q)/normfinal)
 
 #normalisation condition
 @constraint(model, integral(rho,q) == 1)
-@constraint(model, rho(t,-3) == 0)
-@constraint(model, rho(t,3) == 0)
+@constraint(model, rho(t,-5) == 0)
+@constraint(model, rho(t,5) == 0)
+@constraint(model, u(t,-5) <= 0)
+@constraint(model, u(t,5) >= 0)
 
+#neumann boundary conditions
+#constraint(model, deriv(u,q)(t,-5) == 0)
+#@constraint(model, deriv(u,q)(t,5) == 0)
 
+ 
 # SOLVE THE MODEL
 optimize!(model)
 

@@ -1,18 +1,11 @@
 using InfiniteOpt, Distributions, Ipopt;
-using Trapz;
+#using Trapz;
 using CSV;
 using DataFrames;
 using ForwardDiff;
 
+#get parameters and boundary conditions
 include("../params.jl")
-
-#####boundary conditions#######
-
-##LATTICE PARAMETERS!!!
-#T = 2
-#num_supports_t = 11
-#num_supports_q = 10
-#num_supports_p = 10
 
 ##################################
 #Get the model
@@ -26,7 +19,7 @@ model = InfiniteModel(Ipopt.Optimizer);
 @infinite_parameter(model, p in [-10, 10], num_supports = num_supports_p)
 
 #position
-@infinite_parameter(model, q in [-3, 3], num_supports = num_supports_q)
+@infinite_parameter(model, q in [-3.5, 3.5], num_supports = num_supports_q)
 
 
 #let's define some good initial guesses
@@ -79,11 +72,12 @@ end
 #@constraint(model, integral(rho,p,q) == 1)
 @constraint(model, rho(t,-10,q) == 0)
 @constraint(model, rho(t,10,q) == 0)
-@constraint(model, rho(t,p,-1) == 0)
-@constraint(model, rho(t,p,3) == 0)
+@constraint(model, rho(t,p,-3.5) == 0)
+@constraint(model, rho(t,p,3.5) == 0)
 
 
 # SOLVE THE MODEL
+
 optimize!(model)
 
 print(termination_status(model))
@@ -94,7 +88,7 @@ pgrid = [supports(rho)[i][3] for i in 1:length(supports(rho))];
 
 rhovals = reshape(value(rho),(num_supports_t,num_supports_p,num_supports_q));
 vvals = reshape(value(v),(num_supports_t,num_supports_p,num_supports_q));
-uvals = reshape(value(u),(num_supports_t,num_supports_p,num_supports_q));
+#uvals = repeat(reshape(value(u),(num_supports_t,1,num_supports_q)),1,num_supports_p,1);
 
 qax = vec(unique(qgrid))
 pax = vec(unique(pgrid))
@@ -105,8 +99,8 @@ times_vec = vec(unique(tgrid))
 file_name = "infiniteopt/ipopt_underdamped_kl_v1.csv"
 
 # Define the header as an array of strings
-row = ["t" "p" "q" "du" "v" "rho"]
-header = DataFrame(row,["t", "p", "q", "du", "v", "rho"])
+row = ["t" "p" "q" "v" "rho"]
+header = DataFrame(row,["t", "p", "q", "v", "rho"])
 
 # Write the header to a new CSV file
 CSV.write(file_name, header;header =false)
@@ -116,10 +110,10 @@ for j in 1:num_supports_t
      df = DataFrame([times_vec[j] .*vec(ones(num_supports_p*num_supports_q)),
                     vec(pax),
                     vec(qax),
-                    vec(uvals[j,:,:]),
+                    #vec(uvals[j,:,:]),
                     vec(vvals[j,:,:]),
                     vec(rhovals[j,:,:])],
-                    ["t", "p", "q", "du", "v", "rho"])
+                    ["t", "p", "q", "v", "rho"])
 
     CSV.write(file_name, df, append =true)
     
