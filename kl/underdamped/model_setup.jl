@@ -66,7 +66,7 @@ end
 @variable(model, v, Infinite(t,p,q), start = v_init)
 
 #define the objective
-@objective(model, Min, integral(integral((u^2)*rho,q), t)/4)
+@objective(model, Min, integral(integral(integral((u^2)*rho,t),q), p)/4)
 
 #fokker planck
 @constraint(model, deriv(rho,t) + epsilon*p*deriv(rho,q) - deriv((p+u)*rho,q) + deriv(rho,p,p)== 0)
