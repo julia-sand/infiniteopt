@@ -13,7 +13,7 @@ function parse_commandline()
     @add_arg_table s begin
         "--tf"
             help = "final time of the overdamped problem"
-            arg_type = Float
+            arg_type = Float64
             default = 0.2
         "--tsteps"
             help = "number of time coordinates in discretisation"
