@@ -5,7 +5,8 @@ using ImageFiltering;
 using Interpolations;
 using ForwardDiff;
 
-T = 0.2
+include("kl/params.jl")
+#T = 0.2
 
 ##filtering functions
 function filtering(input_array,filter_delta)
@@ -55,7 +56,7 @@ plot!(p2,xlim =(-4,4))
 plot!(p2,ylim =(-0.05,0.5))
 plot!(p2,legend = false)
 
-plot!(p2,[],[],framestyle = :none,legend = true,labels = "Caluya-Halder", subplot = 12,fg_legend = :false)
+plot!(p2,[],[],framestyle = :none,legend = true,labels = "Caluya-Halder", subplot = 12, fg_legend = :false)
 plot!(p2,[],[],framestyle = :none,legend = true,labels = "IPOPT", subplot = 12)
 
 
