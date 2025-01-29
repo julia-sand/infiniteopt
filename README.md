@@ -1,4 +1,4 @@
-This library implements direct 
+This library runs a direct numerical integration model using InfiniteOpt: an optimisation library for julia
 
 There are two main cases covered: 
 1. KL: minimising the Kullback-Leibler divergence
